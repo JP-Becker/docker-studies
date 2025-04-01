@@ -1,0 +1,30 @@
+ARG NODE_VERSION=18.19.1
+FROM node:${NODE_VERSION}
+
+
+# Setando as variaveis de ambiente
+ENV PORT=3001 
+ENV MESSAGE="Hello from Dockerfile"
+
+WORKDIR /app
+
+# Copiando o package.json para ficar no cache e só rodar o npm install quando houver mudança
+# Isso melhora o tempo de build, pois não precisa baixar as dependências toda vez
+COPY package*.json ./
+
+# Instalando as dependências
+RUN npm install
+
+# Copiando todos os arquivos para a imagem
+# Não é necessário copiar o node_modules, pois ele já foi instalado na imagem, no docker ignore já está sendo ignorado
+COPY . .
+
+# Criando um usuário com o run e setando ele como padrão, para nao cair como usuário root
+RUN useradd -m mynode
+USER mynode
+
+# essa parada aqui vai falar se a aplicação está rodando corretamente ou não. aparece no status do docker ps
+HEALTHCHECK --interval=10s --timeout=5s --start-period=5s --retries=3 \
+  CMD ["curl", "-f", "http://localhost:3002"]
+
+CMD ["node", "index.js"]
