@@ -7,6 +7,10 @@ const message = process.env.MESSAGE || "Hello world!"
         res.send(message);
     });
 
+    app.get("/health", (req, res) => {
+        res.sendStatus(200);
+      });
+
     app.listen(port, () => {
         console.log(`Server is running on port ${port}`)
     })
